@@ -151,3 +151,238 @@ O SQL Server Management Studio (SSMS) oferece várias funcionalidades que melhor
 - **Importação e Exportação de Dados:** Facilita a importação e exportação de dados entre diferentes fontes e destinos.
 
 O SSMS é uma ferramenta abrangente que torna mais eficiente a administração e o gerenciamento de bancos de dados SQL Server.
+
+### ** 2º Procedimento | Alimentando a Base**
+### **Inserindo Dados**
+
+**Selecionando o Banco de Dados "Loja":**
+```sql
+-- Seleciona o banco de dados "Loja"
+USE Loja;
+```
+
+**Inserindo Dados na Tabela 'usuario':**
+```sql
+-- Inserindo dados na tabela usuario
+INSERT INTO dbo.usuario (login_usuario, senha_usuario)
+VALUES
+  ('op1', 'op1'),
+  ('op2', 'op2');
+```
+
+**Inserindo Dados na Tabela 'produto':**
+```sql
+-- Inserindo dados na tabela produto
+INSERT INTO dbo.produto (id_produto, nome_produto, quantidade_produto, preco_venda_produto)
+VALUES
+(1, 'Banana', 100, 5.00),
+(3, 'Laranja', 500, 2.00),
+(4, 'Manga', 800, 4.00);
+```
+
+**Inserindo Dados na Tabela 'pessoa':**
+```sql
+-- Inserir dados na tabela 'pessoa'
+INSERT INTO pessoa (nome_pessoa, logradouro_pessoa, cidade_pessoa, estado_pessoa, telefone_pessoa, email_pessoa)
+VALUES ('Joao', 'Rua 12, casa 3, Quitanda', 'Riacho do Sul', 'PA', '1111-1111', 'joao@riacho.com'),
+       ('JJC', 'Rua 11, Centro', 'Riacho do Norte', 'PA', '1212-1212', 'jjc@riacho.com');
+```
+
+**Inserindo Dados na Tabela 'pessoa_fisica':**
+```sql
+-- Inserir dados na tabela 'pessoa_fisica'
+INSERT INTO pessoa_fisica (id_pessoa, cpf)
+VALUES (7, '12345678900');
+```
+
+**Inserindo Dados na Tabela 'pessoa_juridica':**
+```sql
+-- Inserir dados na tabela 'pessoa_juridica'
+INSERT INTO pessoa_juridica(id_pessoa, cnpj)
+VALUES (8, '12345678901234');
+```
+
+**Inserindo Dados na Tabela 'movimento':**
+```sql
+-- Inserir dados na tabela 'movimento'
+INSERT INTO movimento (id_usuario, id_pessoa, id_produto, quantidade_movimento, tipo_movimento, valor_unitario_mov)
+VALUES (1, 7, 1, 20, 'S', 4),
+       (1, 7, 3, 15, 'S', 2),
+       (2, 7, 3, 10, 'S', 3),
+       (1, 8, 3, 15, 'E', 5),
+       (1, 8, 4, 20, 'E', 4);
+```
+
+### **Consulta de Dados**
+
+**Selecionando Dados de Pessoas e Pessoas Físicas:**
+```sql
+-- Seleciona o banco de dados "Loja"
+USE Loja;
+
+-- Este SELECT combina informações de pessoas e pessoas físicas
+SELECT
+  p.id_pessoa, p.nome_pessoa, p.logradouro_pessoa,
+  p.cidade_pessoa, p.estado_pessoa, p.telefone_pessoa,
+  p.email_pessoa, pf.id_pessoa, pf.cpf
+FROM
+  pessoa p
+FULL OUTER JOIN pessoa_fisica pf ON p.id_pessoa = pf.id_pessoa
+WHERE pf.cpf IS NOT NULL;
+```
+
+**Selecionando Dados de Pessoas e Pessoas Jurídicas:**
+```sql
+-- Seleciona o banco de dados "Loja"
+USE Loja;
+
+-- Este SELECT combina informações de pessoas e pessoas jurídicas
+SELECT
+  p.id_pessoa, p.nome_pessoa, p.logradouro_pessoa,
+  p.cidade_pessoa, p.estado_pessoa, p.telefone_pessoa,
+  p.email_pessoa, pj.id_pessoa, pj.cnpj
+FROM
+  pessoa p
+FULL OUTER JOIN pessoa_juridica pj ON p.id_pessoa = pj.id_pessoa
+WHERE pj.cnpj IS NOT NULL;
+```
+
+**Movimentações de Entrada com Produto, Fornecedor, Quantidade, Preço Unitário e Valor Total:**
+```sql
+-- Movimentações de entrada, com produto, fornecedor, quantidade, preço unitário e valor total.
+SELECT
+  prod.nome_produto AS PRODUTO,
+  p.nome_pessoa AS FORNECEDOR,
+  m.quantidade_movimento AS QUANTIDADE,
+  m.valor_unitario_mov AS PREÇO_UNITÁRIO,
+ (m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL
+FROM
+ movimento m
+  JOIN pessoa p ON m.id_pessoa = p.id_pessoa
+  JOIN produto prod ON m.id_produto = prod.id_produto
+WHERE m.tipo_movimento = 'E';
+```
+
+**Movimentações de Saída com Produto, Comprador, Quantidade, Preço Unitário e Valor Total:**
+```sql
+-- Movimentações de saída, com produto, comprador, quantidade, preço unitário e valor total.
+SELECT
+  prod.nome_produto AS PRODUTO,
+  p.nome_pessoa AS COMPRADOR,
+  m.quantidade_movimento AS QUANTIDADE,
+  m.valor_unitario_mov AS PREÇO_UNITÁRIO,
+ (m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL
+FROM
+ movimento m
+  JOIN pessoa p ON m.id_pessoa = p.id_pessoa
+  JOIN produto prod ON m.id_produto = prod.id_produto
+WHERE m.tipo_movimento = 'S';
+```
+
+**Valor Total das Entradas Agrupadas por Produto:**
+```sql
+-- Valor total das entradas agrupadas por produto.
+SELECT
+  prod.nome_produto AS PRODUTO,
+  SUM(m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL_ENTRADAS
+FROM
+  pessoa p
+INNER JOIN movimento m ON p.id_pessoa = m.id_pessoa
+INNER JOIN produto prod ON m.id_produto = prod.id_produto
+WHERE
+  m.tipo_movimento = 'E'
+GROUP BY
+  prod.nome_produto;
+```
+
+**Valor Total das Saídas Agrupadas por Produto:**
+```sql
+-- Valor total das saídas agrupadas por produto.
+SELECT
+  prod.nome_produto AS PRODUTO,
+  SUM(m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL_SAÍDAS
+FROM
+  pessoa p
+INNER JOIN movimento m ON p.id_pessoa = m.id_pessoa
+INNER JOIN produto prod ON m.id_produto = prod.id_produto
+WHERE
+  m.tipo_movimento = 'S'
+GROUP BY
+  prod.nome_produto;
+```
+
+**Operadores sem Movimentações de Entrada (Compra):**
+```sql
+-- Operadores que não efetuaram movimentações de entrada (compra)
+SELECT u.id_usuario, u.login_usuario
+FROM usuario u
+WHERE u.id_usuario NOT IN (
+  SELECT DISTINCT m.id_usuario
+  FROM movimento m
+  WHERE m.tipo_movimento = 'E'
+);
+```
+
+**Valor Total de Entrada Agrupado por Operador:**
+```sql
+-- Valor total de entrada, agrupado por operador.
+SELECT
+  u.login_usuario AS OPERADOR,
+  SUM(m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL_ENTRADAS
+FROM
+  usuario u
+INNER JOIN movimento m ON u.id_usuario = m.id_usuario
+WHERE
+  m.tipo_movimento = 'E'
+GROUP BY
+  u.login_usuario;
+```
+
+**Valor Total de Saída Agrupado por Operador:**
+```sql
+-- Valor total de saída, agrupado por operador.
+SELECT
+  u.login_usuario AS OPERADOR,
+  SUM(m.quantidade_movimento * m.valor_unitario_mov) AS VALOR_TOTAL_SAÍDA
+FROM
+  usuario u
+INNER JOIN movimento m ON u.id_usuario = m.id_usuario
+WHERE
+  m.tipo_movimento = 'S'
+GROUP BY
+  u.login_usuario;
+```
+
+**Valor Médio de Venda por Produto (Média Ponderada):**
+```sql
+-- Valor médio de venda por produto, utilizando média ponderada.
+SELECT 
+  prod.nome_produto AS PRODUTO,
+  CAST(SUM(m.quantidade_movimento * m.valor_unitario_mov) / SUM(m.quantidade_movimento) AS NUMERIC(18,2)) AS VENDA_MEDIA_PONDERADA 
+FROM produto prod
+LEFT JOIN movimento m ON prod.id_produto = m.id_produto
+WHERE m.tipo_movimento = 'S' 
+GROUP BY prod.nome_produto;
+```
+
+a) **Diferenças entre SEQUENCE e IDENTITY:**
+
+SEQUENCE: É um objeto de banco de dados que gera valores sequenciais em um banco de dados SQL. A principal diferença é que as sequências não estão vinculadas a uma tabela específica e podem ser usadas em várias tabelas. O valor da sequência é gerado independentemente de qualquer inserção em uma tabela. Pode ser compartilhado entre várias tabelas e até mesmo entre bancos de dados.
+IDENTITY: É uma propriedade de coluna usada em algumas bases de dados (incluindo o SQL Server) para gerar valores sequenciais exclusivos automaticamente quando linhas são inseridas em uma tabela. A diferença fundamental é que a propriedade IDENTITY está associada a uma coluna específica em uma tabela, e os valores são gerados automaticamente apenas quando novas linhas são inseridas nessa tabela.
+
+b) **Importância das Chaves Estrangeiras para a Consistência do Banco de Dados:**
+
+As chaves estrangeiras (foreign keys) são essenciais para manter a integridade referencial e a consistência do banco de dados. A importância das chaves estrangeiras inclui:
+- **Integridade Referencial:** As chaves estrangeiras garantem que os relacionamentos entre tabelas sejam consistentes. Elas garantem que os valores em uma tabela filha (referenciada) correspondam aos valores na tabela pai (referência). Isso evita que dados inconsistentes ou órfãos sejam inseridos no banco de dados.
+- **Manutenção da Consistência dos Dados:** As chaves estrangeiras ajudam a manter a consistência dos dados, garantindo que os relacionamentos entre as tabelas sejam mantidos de forma apropriada. Isso é fundamental para evitar erros e inconsistências nos dados.
+- **Evita Deleções Indesejadas:** As chaves estrangeiras podem ser configuradas para impor a regra de cascata, o que significa que, se um registro na tabela pai for excluído, os registros correspondentes na tabela filha também serão excluídos. Isso evita a exclusão acidental de dados relacionados.
+
+c) **Operadores do SQL relacionados à Álgebra Relacional e Cálculo Relacional:**
+
+Álgebra Relacional: Alguns dos operadores da álgebra relacional incluem SELEÇÃO (σ), PROJEÇÃO (π), UNIÃO (∪), INTERSEÇÃO (∩), DIFERENÇA (-), PRODUTO CARTESIANO (×), JUNÇÃO (JOIN) e DIVISÃO (÷).
+Cálculo Relacional: O cálculo relacional não é uma linguagem baseada em operadores como a álgebra relacional, mas em predicados e lógica de primeira ordem. Não há uma correspondência direta entre os operadores da álgebra relacional e o cálculo relacional, mas os conceitos de consulta são semelhantes.
+
+d) **Agrupamento em Consultas e Requisito Obrigatório:**
+
+O agrupamento em consultas SQL é realizado usando a cláusula "GROUP BY." O requisito obrigatório ao usar "GROUP BY" é que todas as colunas na lista de projeção (SELECT) que não fazem parte de uma função de agregação devem estar presentes na cláusula "GROUP BY." Em outras palavras, quando você deseja agrupar os resultados de uma consulta com base em determinadas colunas, todas as colunas que não são alvo de funções de agregação (como SUM, COUNT, AVG, etc.) devem ser listadas na cláusula "GROUP BY." Isso garante que a consulta seja semântica e logicamente correta, agrupando os resultados conforme desejado.
+
