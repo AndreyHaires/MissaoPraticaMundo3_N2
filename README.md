@@ -8,7 +8,7 @@ Polo Centro - Palhoça – SC
 **Integrantes da Prática:** Andrey Haertel Aires  
 
 ## Repositório GIT
-[Endereço do Repositório GIT](https://link-do-seu-repositorio-git)
+https://link-do-seu-repositorio-git
 
 ## 1 - 1º Procedimento | Criando o Banco de Dados
 
