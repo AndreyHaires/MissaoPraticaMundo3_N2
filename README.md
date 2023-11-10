@@ -8,7 +8,7 @@ Polo Centro - Palhoça – SC
 **Integrantes da Prática:** Andrey Haertel Aires  
 
 ## Repositório GIT
-https://link-do-seu-repositorio-git
+[Link](https://github.com/AndreyHaires/MissaoPraticaMundo3_N2)
 
 ## 1 - 1º Procedimento | Criando o Banco de Dados
 
