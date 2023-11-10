@@ -116,8 +116,6 @@ CREATE INDEX IFK_Responsavel ON movimento (id_pessoa);
 CREATE INDEX IFK_Item_Movimentado ON movimento (id_produto);
 ```
 
-### Os resultados da execução dos códigos também devem ser apresentados.
-
 ## Análise e Conclusão
 
 ### a) Como são implementadas as diferentes cardinalidades (1X1, 1XN ou NxN) em um banco de dados relacional?
